@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
 import { registerUser } from '../api/authServices';
 
 const SignUpScreen = ({ navigation }) => {
+    const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,7 +18,8 @@ const SignUpScreen = ({ navigation }) => {
                 Alert.alert("Error", "Passwords do not match");
                 return;
             }
-            await registerUser({ email, password });
+            let res = await registerUser({ fullName, email, password });
+            console.log("res", res);
             Alert.alert("Success", "User registered successfully");
             // Navigate to login or home screen
         } catch (error) {
@@ -26,32 +28,41 @@ const SignUpScreen = ({ navigation }) => {
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <CustomInput
-                placeholder="Email"
-                value={email}
-                setValue={setEmail}
-                keyboardType="email-address"
-            />
-            <CustomInput
-                placeholder="Password"
-                value={password}
-                setValue={setPassword}
-                secureTextEntry
-            />
-            <CustomInput
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                setValue={setConfirmPassword}
-                secureTextEntry
-            />
-            <CustomButton title="Sign Up" onPress={handleSignUp} />
-            <Text
-                style={styles.signInText}
-                onPress={() => navigation.navigate('SignIn')}>
-                Already have an account? Sign In
-            </Text>
-        </ScrollView>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                <ScrollView contentContainerStyle={styles.container}>
+                    <CustomInput
+                        placeholder="Full Name"
+                        value={fullName}
+                        setValue={setFullName}
+                    />
+                    <CustomInput
+                        placeholder="Email"
+                        value={email}
+                        setValue={setEmail}
+                        keyboardType="email-address"
+                    />
+                    <CustomInput
+                        placeholder="Password"
+                        value={password}
+                        setValue={setPassword}
+                        secureTextEntry
+                    />
+                    <CustomInput
+                        placeholder="Confirm Password"
+                        value={confirmPassword}
+                        setValue={setConfirmPassword}
+                        secureTextEntry
+                    />
+                    <CustomButton title="Sign Up" onPress={handleSignUp} />
+                    <Text
+                        style={styles.signInText}
+                        onPress={() => navigation.navigate('SignIn')}>
+                        Already have an account? Sign In
+                    </Text>
+                </ScrollView>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
     );
 };
 
