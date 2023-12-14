@@ -12,6 +12,7 @@ const SignInScreen = ({ navigation }) => {
             <CustomInput placeholder="Email" value={email} setValue={setEmail} />
             <CustomInput placeholder="Password" value={password} setValue={setPassword} secureTextEntry />
             <CustomButton title="Sign In" onPress={() => {/* Handle sign in */ }} />
+            <Text onPress={() => navigation.navigate('ForgotPassword')}>Forgot Password?</Text>
             <Text onPress={() => navigation.navigate('SignUp')}>Don't have an account? Sign Up</Text>
         </View>
     );
