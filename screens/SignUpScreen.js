@@ -1,18 +1,28 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
-// import AuthService from '../services/AuthService'; // Assuming AuthService is set up for sign-up logic
+import { registerUser } from '../api/authServices';
 
 const SignUpScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    const handleSignUp = () => {
-        // Implement the sign-up logic here.
-        // Example: AuthService.signUp(email, password).then(...).catch(...)
-        // Make sure to validate the inputs, like checking if the passwords match.
+
+    const handleSignUp = async () => {
+        try {
+            console.log("email", email);
+            if (password !== confirmPassword) {
+                Alert.alert("Error", "Passwords do not match");
+                return;
+            }
+            await registerUser({ email, password });
+            Alert.alert("Success", "User registered successfully");
+            // Navigate to login or home screen
+        } catch (error) {
+            Alert.alert("Error", "Failed to register user");
+        }
     };
 
     return (
@@ -48,8 +58,8 @@ const SignUpScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
+        // alignItems: 'center',
+        // justifyContent: 'center',
         padding: 20,
     },
     signInText: {
