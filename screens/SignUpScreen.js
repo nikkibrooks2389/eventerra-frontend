@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Alert, TouchableWithoutFeedback, Ke
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
 import { registerUser, checkEmailAvailability } from '../api/authServices';
-
+import { GlobalStyles } from '../styles/GlobalStyles';
 const SignUpScreen = ({ navigation }) => {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
@@ -16,6 +16,8 @@ const SignUpScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState('');
     const [formError, setFormError] = useState('');
+    const [passwordVisible, setPasswordVisible] = useState(false);
+
 
 
     const handleSignUp = async () => {
@@ -44,7 +46,7 @@ const SignUpScreen = ({ navigation }) => {
             }
 
 
-            console.log(password, confirmPassword)
+
             if (password !== confirmPassword) {
                 setPasswordsNotMatching(true);
                 setLoading(false);
@@ -54,15 +56,24 @@ const SignUpScreen = ({ navigation }) => {
             // Clear email and form errors, and proceed with registration
             setEmailError('');
             setFormError('');
-            console.log("HERE2")
+
 
             let res = await registerUser({ fullName, email, password });
 
-            setLoading(false);
-            Alert.alert('Success', 'User registered successfully');
+            // Inside your handleSignUp function, after successful registration
+            Alert.alert('Success', 'Registration Successful! You can now log in to your account.', [
+                {
+                    text: 'OK',
+                    onPress: () => {
+                        setLoading(false);
+                        navigation.navigate('SignIn');
+                    },
+                },
+            ]);
+            navigation.navigate('SignIn');
             // Navigate to login or home screen
         } catch (error) {
-            console.log(error.response)
+
             if (error.response && error.response.status === 400) {
                 const validationErrors = error.response.data.errors;
                 let fieldErrors = {};
@@ -86,7 +97,6 @@ const SignUpScreen = ({ navigation }) => {
 
 
             } else {
-                console.log("ERRROR", error);
                 Alert.alert('Error', 'Failed to register user');
             }
             setLoading(false);
@@ -114,7 +124,6 @@ const SignUpScreen = ({ navigation }) => {
         checkPasswordStrength(password);
     }, [password]);
 
-
     const getPasswordStrengthColor = () => {
         switch (passwordStrength) {
             case 'Weak':
@@ -127,36 +136,62 @@ const SignUpScreen = ({ navigation }) => {
                 return 'black'; // Default color when no text in password
         }
     };
+    const handleConfirmPasswordChange = (confirmPasswordValue) => {
+        setConfirmPassword(confirmPasswordValue);
 
+        // Check if the passwords match and clear the error if they do
+        if (password === confirmPasswordValue) {
+            setPasswordsNotMatching(false);
+        } else {
+            setPasswordsNotMatching(true);
+        }
+    };
+
+    const handlePasswordChange = (passwordValue) => {
+        console.log("PASSWORD VAlue", passwordValue)
+        console.log("PASSWORD", password)
+        setPassword(passwordValue);
+        setPasswordError(''); // Clear password error when user starts typing
+
+    };
+    console.log(password)
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={GlobalStyles.container}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
                 <ScrollView contentContainerStyle={styles.scrollView}>
                     <View style={styles.formGroup}>
-                        <Text style={styles.label}>Full Name {userNameError ? <Text style={styles.errorText}> {userNameError}</Text> : null} </Text>
+                        <Text style={[GlobalStyles.primaryText, styles.label]}>Full Name {userNameError ? <Text style={styles.errorText}> {userNameError}</Text> : null} </Text>
                         <CustomInput placeholder="Full Name" value={fullName} setValue={setFullName} />
                     </View>
                     <View style={styles.formGroup}>
-                        <Text style={styles.label}>Email   {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}</Text>
+                        <Text style={[GlobalStyles.primaryText, styles.label]}>Email   {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}</Text>
                         <CustomInput placeholder="Email" value={email} setValue={setEmail} keyboardType="email-address" />
                     </View>
 
                     <View style={styles.formGroup}>
-                        <Text style={styles.label}>Password     {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null || password.length > 0 ? (
+                        <Text style={[GlobalStyles.primaryText, styles.label]}>Password     {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null || password.length > 0 ? (
                             <Text style={[styles.passwordStrengthText, { color: getPasswordStrengthColor() }]}>
                                 Password Strength: {passwordStrength}
                             </Text>
                         ) : null}</Text>
-                        <CustomInput placeholder="Password" value={password} setValue={setPassword} secureTextEntry />
+                        <CustomInput
+                            textContentType="oneTimeCode"
+                            placeholder="Password"
+                            value={password}
+                            setValue={handlePasswordChange}
+                            secureTextEntry={true}
+                        />
                     </View>
 
                     <View style={styles.formGroup}>
-                        <Text style={styles.label}>Confirm Password  {passwordsNotMatching ? <Text style={styles.errorText}>Passwords need to match</Text> : null}</Text>
+                        <Text style={[GlobalStyles.primaryText, styles.label]}>Confirm Password  {passwordsNotMatching ? <Text style={styles.errorText}>Passwords need to match</Text> : null}</Text>
                         <CustomInput
                             placeholder="Confirm Password"
                             value={confirmPassword}
-                            setValue={setConfirmPassword}
-                            secureTextEntry
+                            setValue={handleConfirmPasswordChange}
+                            secureTextEntry={true}
+                            textContentType="oneTimeCode"
+
                         />
                     </View>
                     {formError ? <Text style={styles.formError}>{formError}</Text> : null}
@@ -172,22 +207,18 @@ const SignUpScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: 'white',
-    },
+
     scrollView: {
         flexGrow: 1,
-        padding: 20,
         justifyContent: 'center',
     },
     formGroup: {
         marginBottom: 20,
     },
     label: {
-        fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 5,
+
     },
     errorText: {
         color: 'red',

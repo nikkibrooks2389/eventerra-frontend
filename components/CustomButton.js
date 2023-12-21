@@ -12,17 +12,18 @@ const CustomButton = ({ onPress, title, style, textStyle }) => {
 const styles = StyleSheet.create({
     button: {
         // Default button styling
-        backgroundColor: '#007bff',
-        padding: 10,
-        borderRadius: 5,
+        backgroundColor: '#74D3D4',
+        padding: 15,
+        borderRadius: 25,
         width: '100%',
         alignItems: 'center',
         marginBottom: 10,
+
     },
     text: {
         // Default text styling
         color: 'white',
-        fontSize: 16,
+        fontSize: 18,
     },
 });
 
